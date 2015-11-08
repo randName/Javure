@@ -1,8 +1,8 @@
 from django.db import models
 
 class Article(models.Model):
-    _id = models.PositiveIntegerField(primary_key=True)
-    name = models.CharField(max_length=20)
+    _id = models.PositiveIntegerField( 'ID', primary_key=True )
+    name = models.CharField( max_length=20 )
 
     def __str__(self):
         return self.name
@@ -12,7 +12,7 @@ class Article(models.Model):
         ordering = ['_id']
 
 class Maker(Article):
-    url = models.URLField(blank=True)
+    url = models.URLField( 'URL', blank=True )
 
 class Director(Article):
     pass
@@ -23,7 +23,7 @@ class Label(Article):
 class Series(Article):
 
     class Meta:
-        verbose_name_plural = "Series"
+        verbose_name_plural = 'series'
 
 class Tag(Article):
 
@@ -43,27 +43,30 @@ class Tag(Article):
         (PLAY, 'Play'),
     )
 
-    category = models.PositiveIntegerField(choices=CATEGORIES,default=MISC)
+    category = models.PositiveIntegerField( choices=CATEGORIES, default=MISC )
 
 class Actress(Article):
-    roma = models.CharField(max_length=50,blank=True)
-    furi = models.CharField(max_length=50,blank=True)
+
+    roma = models.CharField( 'ローマ字', max_length=50, blank=True )
+    furi = models.CharField( '振り仮名', max_length=50, blank=True )
 
     class Meta:
-        verbose_name_plural = "Actresses"
+        verbose_name_plural = 'actresses'
 
 class Video(models.Model):
-    cid = models.CharField(primary_key=True,max_length=20)
-    released_date = models.DateField()
+
+    cid = models.CharField( 'ID', primary_key=True, max_length=20 )
+    released_date = models.DateField( 'Released Date' )
     runtime = models.DurationField()
     title = models.TextField()
-    display_id = models.SlugField(max_length=20)
-    maker = models.ForeignKey('Maker')
-    director = models.ForeignKey('Director',blank=True,null=True)
-    label = models.ForeignKey('Label',blank=True,null=True)
-    series = models.ForeignKey('Series',blank=True,null=True)
-    tags = models.ManyToManyField('Tag',blank=True)
-    actresses = models.ManyToManyField('Actress',blank=True)
+    display_id = models.SlugField( 'Display ID', max_length=20 )
+
+    maker = models.ForeignKey( 'Maker' )
+    director = models.ForeignKey( 'Director', blank=True, null=True )
+    label = models.ForeignKey( 'Label', blank=True, null=True )
+    series = models.ForeignKey( 'Series', blank=True, null=True )
+    actresses = models.ManyToManyField( 'Actress', blank=True )
+    tags = models.ManyToManyField( 'Tag', blank=True )
 
     def __str__(self):
         return self.display_id
