@@ -1,37 +1,31 @@
 from django.db import models
 
-class Maker(models.Model):
-    m_id = models.PositiveIntegerField(primary_key=True)
+class Article(models.Model):
+    _id = models.PositiveIntegerField(primary_key=True)
     name = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        abstract = True
+        ordering = ['_id']
+
+class Maker(Article):
     url = models.URLField(blank=True)
 
-    def __str__(self):
-        return self.name
+class Director(Article):
+    pass
 
-class Director(models.Model):
-    d_id = models.PositiveIntegerField(primary_key=True)
-    name = models.CharField(max_length=20)
+class Label(Article):
+    pass
 
-    def __str__(self):
-        return self.name
+class Series(Article):
 
-class Label(models.Model):
-    l_id = models.PositiveIntegerField(primary_key=True)
-    name = models.CharField(max_length=20)
+    class Meta:
+        verbose_name_plural = "Series"
 
-    def __str__(self):
-        return self.name
-
-class Series(models.Model):
-    s_id = models.PositiveIntegerField(primary_key=True)
-    name = models.CharField(max_length=20)
-
-    def __str__(self):
-        return self.name
-
-class Tag(models.Model):
-    t_id = models.PositiveIntegerField(primary_key=True)
-    name = models.CharField(max_length=20)
+class Tag(Article):
 
     MISC = 5
     SITUATION = 0
@@ -40,7 +34,7 @@ class Tag(models.Model):
     GENRE = 3
     PLAY = 4
 
-    TYPE_CHOICES = (
+    CATEGORIES = (
         (MISC, 'Others'),
         (SITUATION, 'Situation'),
         (ATYPE, 'Actress Type'),
@@ -49,18 +43,14 @@ class Tag(models.Model):
         (PLAY, 'Play'),
     )
 
-    t_type = models.PositiveIntegerField(choices=TYPE_CHOICES,default=MISC)
+    category = models.PositiveIntegerField(choices=CATEGORIES,default=MISC)
 
-    def __str__(self):
-        return self.name
-
-class Actress(models.Model):
-    a_id = models.PositiveIntegerField(primary_key=True)
-    name = models.CharField(max_length=20)
+class Actress(Article):
     roma = models.CharField(max_length=50,blank=True)
+    furi = models.CharField(max_length=50,blank=True)
 
-    def __str__(self):
-        return self.name
+    class Meta:
+        verbose_name_plural = "Actresses"
 
 class Video(models.Model):
     cid = models.CharField(primary_key=True,max_length=20)
@@ -78,3 +68,5 @@ class Video(models.Model):
     def __str__(self):
         return self.display_id
 
+    class Meta:
+        ordering = ['-released_date']
