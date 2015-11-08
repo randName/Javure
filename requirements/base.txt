@@ -1,0 +1,4 @@
+beautifulsoup4==4.4.1
+Django==1.8.6
+lxml==3.4.4
+requests==2.8.1
