@@ -34,9 +34,33 @@ class Command(BaseCommand):
                         tag = Tag.objects.get(_id=tag_id)
                     except Tag.DoesNotExist:
                         tag = Tag(_id=tag_id, name=info[0], category=switcher[info[1]] )
-                        tag.save()
-                    except TypeError:
-                        self.stdout.write("TypeError")
+
+                    tag.save()
+
+            elif target == 'makers':
+                self.stdout.write("Scraping makers from DMM...")
+
+                for mora in dmm.MORAS:
+                    for m_id, info in dmm.get_makers(mora).items():
+                        try:
+                            maker = Maker.objects.get(_id=m_id)
+                        except Maker.DoesNotExist:
+                            maker = Maker(_id=m_id, name=info[0] )
+
+                        maker.save()
+
+            elif target == 'actresses':
+                self.stdout.write("Scraping actresses from DMM...")
+
+                for mora in dmm.MORAS:
+                    for a_id, info in dmm.get_actresses(mora).items():
+                        try:
+                            actress = Actress.objects.get(_id=a_id)
+                        except Actress.DoesNotExist:
+                            actress = Actress(_id=a_id, name=info[0], roma=info[1] )
+
+                        actress.save()
+
             else:
                 self.stdout.write("Error: Scrape target '%s' not recognised" % target)
 
