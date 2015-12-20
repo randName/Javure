@@ -19,7 +19,19 @@ class Command(BaseCommand):
 
         dmm = DMM()
 
-        def get_model( model, article, m_id ):
+        def get_model( article, m_id ):
+
+            prop = {
+                'maker': Maker,
+                'label': Label,
+                'keyword': Tag,
+                'series': Series,
+                'actress': Actress,
+                'director': Director
+            }
+
+            model = prop[article]
+
             try:
                 return model.objects.get(_id=m_id)
             except model.DoesNotExist:
@@ -33,43 +45,44 @@ class Command(BaseCommand):
 
         article = options['article']
 
-        if article == 'maker':
-            self.stdout.write("Getting maker")
-        else:
+
+
+        if article != 'maker':
             self.stdout.write("Error: %s Only maker is supported now" % (article,))
             return
 
         for a_id in options['id']:
-            # num_works = dmm.get_count( 0, article, a_id )
+            kwa = { article: get_model( article, a_id ) }
+            works_count = Video.objects.filter(**kwa).count()
+            num_works = dmm.get_count( 0, article, a_id )
+            self.stdout.write("Getting %d/%d works from %s %s" % (works_count, num_works, article, a_id))
 
-            for v in dmm.get_works( 0, a_id, 5 ):
+            for v in dmm.get_works( 0, a_id, num_works ):
                 try:
                     video = Video.objects.get(cid=v['cid'])
                 except Video.DoesNotExist:
                     video = Video(cid=v['cid'],title=v['title'],released_date=v['date'])
                     video.runtime = timedelta(minutes=v['runtime'])
 
-                    video.display_id = video.cid
+                    video.display_id = dmm.rename( v['cid'], v['maker'] )
 
-                    video.maker = get_model( Maker, 'maker', v['maker'] )
+                    video.maker = get_model( 'maker', v['maker'] )
 
                     for a in v['actresses']:
-                        video.actresses.add( get_model( Actress, 'actress', a ) )
+                        video.actresses.add( get_model( 'actress', a ) )
 
                     for t in v['tags']:
-                        video.tags.add( get_model( Tag, 'keyword', t ) )
+                        video.tags.add( get_model( 'keyword', t ) )
 
                     if 'director' in v:
-                        video.director = get_model( Director, 'director', v['director'] )
+                        video.director = get_model( 'director', v['director'] )
 
                     if 'label' in v:
-                        video.label = get_model( Label, 'label', v['label'] )
+                        video.label = get_model( 'label', v['label'] )
 
                     if 'series' in v:
-                        video.series = get_model( Series, 'series', v['series'] )
+                        video.series = get_model( 'series', v['series'] )
 
-                    # self.stdout.write( repr( v ) )
-                
                     video.save()
 
         self.stdout.write("Done")
