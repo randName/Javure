@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 from library.models import *
 
-import sys
+import sys, itertools
 sys.path.insert(0, '/home/ec2-user/JAV-scraper')
 
 from datetime import timedelta
@@ -45,7 +45,7 @@ class Command(BaseCommand):
 
         article = options['article']
 
-
+        # spinner = itertools.cycle(['-', '/', '|', '\\'])
 
         if article != 'maker':
             self.stdout.write("Error: %s Only maker is supported now" % (article,))
@@ -53,11 +53,15 @@ class Command(BaseCommand):
 
         for a_id in options['id']:
             kwa = { article: get_model( article, a_id ) }
-            works_count = Video.objects.filter(**kwa).count()
-            num_works = dmm.get_count( 0, article, a_id )
-            self.stdout.write("Getting %d/%d works from %s %s" % (works_count, num_works, article, a_id))
+            works_c = Video.objects.filter(**kwa).count()
+            n_works = dmm.get_count( 0, article, a_id )
+            self.stdout.write("Getting %d/%d works from %s %s ..." % (works_c,n_works,article,a_id))
 
-            for v in dmm.get_works( 0, a_id, num_works ):
+            for v in dmm.get_works( 0, a_id, n_works ):
+                # self.stdout.write( "\b" )
+                # self.stdout.write( spinner.next(), ending="" )
+                # self.stdout.flush()
+
                 try:
                     video = Video.objects.get(cid=v['cid'])
                 except Video.DoesNotExist:
@@ -65,6 +69,8 @@ class Command(BaseCommand):
                     video.runtime = timedelta(minutes=v['runtime'])
 
                     video.display_id = dmm.rename( v['cid'], v['maker'] )
+
+                    if not video.display_id: continue
 
                     video.maker = get_model( 'maker', v['maker'] )
 
