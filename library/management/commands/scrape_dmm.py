@@ -26,7 +26,7 @@ class Command(BaseCommand):
                     'ジャンル': Tag.GENRE,
                     'コスチューム': Tag.COSTUME,
                     'ＡＶ女優タイプ': Tag.ATYPE,
-                   'シチュエーション': Tag.SITUATION,
+                    'シチュエーション': Tag.SITUATION,
                 }
 
                 for tag_id, info in dmm.get_tags().items():

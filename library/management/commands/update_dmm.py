@@ -1,10 +1,8 @@
 from django.core.management.base import BaseCommand, CommandError
 from library.models import *
 
-import sys, itertools
+import sys
 sys.path.insert(0, '/home/ec2-user/JAV-scraper')
-
-from datetime import timedelta
 
 from DMM import DMM
 
@@ -17,17 +15,11 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        dmm = DMM()
-
         def get_model( article, m_id ):
 
             prop = {
-                'maker': Maker,
-                'label': Label,
-                'keyword': Tag,
-                'series': Series,
-                'actress': Actress,
-                'director': Director
+                'maker': Maker, 'label': Label, 'series': Series,
+                'director': Director, 'actress': Actress, 'keyword': Tag
             }
 
             model = prop[article]
@@ -43,55 +35,42 @@ class Command(BaseCommand):
 
                 return model_object
 
-        article = options['article']
+        def import_video( v ):
+            v_slicer = ( 'cid', 'pid', 'title', 'display_id', 'runtime', 'released_date' )
 
-        # spinner = itertools.cycle(['-', '/', '|', '\\'])
+            try:
+                video = Video.objects.get(pid=v['pid'])
+            except Video.DoesNotExist:
+                video = Video(**{ k: v[k] for k in v_slicer })
+
+                if not video.display_id: return ( 1, v['pid'] )
+
+                for a in ( 'maker', 'label', 'series' ):
+                   if a in v: setattr(video, a, get_model( a, v[a] ) )
+
+                for t in v['tags']: video.tags.add( get_model( 'keyword', t ) )
+                for a in v['actresses']: video.actresses.add( get_model( 'actress', a ) )
+
+                video.save()
+
+            return ( None, None )
+
+        article = options['article']
 
         if article != 'maker':
             self.stdout.write("Error: %s Only maker is supported now" % (article,))
             return
 
+        dmm = DMM()
+
         for a_id in options['id']:
-            kwa = { article: get_model( article, a_id ) }
-            works_c = Video.objects.filter(**kwa).count()
+            works_c = Video.objects.filter(**{ "%s__pk" % article : a_id }).count()
             n_works = dmm.get_count( 0, article, a_id )
-            self.stdout.write("Getting %d/%d works from %s %s ..." % (works_c,n_works,article,a_id))
+            self.stdout.write("Getting %d/%d works from %s %s ..." %(works_c,n_works,article,a_id))
 
-            for v in dmm.get_works( 0, a_id, n_works ):
-                # self.stdout.write( "\b" )
-                # self.stdout.write( spinner.next(), ending="" )
-                # self.stdout.flush()
-
-                try:
-                    video = Video.objects.get(cid=v['cid'])
-                except Video.DoesNotExist:
-                    video = Video(cid=v['cid'],title=v['title'],released_date=v['date'])
-                    video.runtime = timedelta(minutes=v['runtime'])
-
-                    video.display_id = dmm.rename( v['cid'], v['maker'] )
-
-                    if not video.display_id: continue
-
-                    video.maker = get_model( 'maker', v['maker'] )
-
-                    for a in v['actresses']:
-                        video.actresses.add( get_model( 'actress', a ) )
-
-                    for t in v['tags']:
-                        video.tags.add( get_model( 'keyword', t ) )
-
-                    if 'director' in v:
-                        video.director = get_model( 'director', v['director'] )
-
-                    if 'label' in v:
-                        video.label = get_model( 'label', v['label'] )
-
-                    if 'series' in v:
-                        video.series = get_model( 'series', v['series'] )
-
-                    video.save()
-
+            retvals = dmm.get_works( 0, a_id, n_works - works_c, callback = import_video )
+            self.stdout.write(' ,'.join( em for ec,em in retvals if ec ))
+        
         self.stdout.write("Done")
 
         return
-
