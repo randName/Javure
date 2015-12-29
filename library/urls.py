@@ -3,6 +3,9 @@ from . import views
 
 urlpatterns = [
     url(r'^$', views.home, name='home'),
-    url(r'^v/(?P<cid>[a-z0-9]+)$', views.video_page),
-    url(r'^(?P<article>[mlsdat])/(?P<a_id>[0-9]+)$', views.article),
+    url(r'^ajax/?$', views.ajax),
+    url(r'^stats/?$', views.stats, name='stats'),
+    url(r'^v/(?P<cid>[a-z0-9_]+)?$', views.video_page, name='video_page'),
+    url(r'^(?P<article>[mlsdat])/(?P<a_id>[0-9]+)?$', views.article, name='article'),
+    url(r'^(?P<article>makers|labels|series|directors|actresses|tags)/?$', views.article_page, name='article_page'),
 ]

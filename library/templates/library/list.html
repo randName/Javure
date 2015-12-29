@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block head_title %}{{ pager.title | capfirst }}{% endblock %}
+
+{% block content %}
+<div class="container">
+{% include "pagination" %}
+ <table class="table table-condensed">
+  {% include "thead" %}
+  <tbody>
+  {% for v in pager %}
+   <tr>
+    <td><a href="/v/{{ v.cid }}" >{{ v.display_id }}</a></td>
+    <td>{{ v.title | truncatechars:30 }}</td><td>{{ v.released_date }}</td>
+   </tr>
+  {% endfor %}
+  </tbody>
+ </table>
+{% include "pagination" %}
+</div>
+{% endblock %}
+

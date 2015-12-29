@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block head_title %}Tags listing{% endblock %}
+{% block content %}
+<div class="container">
+{% regroup tags|dictsort:"category" by get_category_display as tags_list %}
+{% for type in tags_list %}
+ <div class="panel panel-primary">
+  <div class="panel-heading">{{ type.grouper }}</div>
+  <div class="panel-body">
+  {% for tag in type.list|dictsortreversed:"count" %}
+   {% if forloop.counter != 1 %}|{% endif %}
+   <a href="{% url 'article' 't' tag.pk %}">{{ tag.name }} <span class="badge">{{ tag.count }}</span></a>
+  {% endfor %}
+  </div>
+ </div>
+{% endfor %}
+</div>
+{% endblock %}

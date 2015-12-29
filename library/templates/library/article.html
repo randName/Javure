@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block head_title %}{{ pager.title | capfirst }} listing{% endblock %}
+{% block content %}
+<div class="container">
+{% include "pagination" %}
+ <table class="table table-condensed">
+  {% include "thead" %}
+  <tbody>
+  {% for a in pager %}
+   <tr>
+    <td><a href="{% url 'article' pager.title|first a.pk %}" >{{ a.pk }}</a></td>
+	<td>{{ a.name }}</td><td>{{ a.count }}</td>
+   </tr>
+  {% endfor %}
+  </tbody>
+ </table>
+{% include "pagination" %}
+</div>
+{% endblock %}

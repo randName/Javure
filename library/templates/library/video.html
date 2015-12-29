@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block head_css %}
+<style>@media all and (max-width: 500px) { div.carousel-caption { font-size:9px; } }</style>
+{% endblock %}
+{% block head_title %}{{ video.display_id }}{% endblock %}
+
+{% block content %}
+<div class="container">
+<div id="main-info" class="carousel slide" data-ride="carousel" data-interval="false" >
+ <ol class="carousel-indicators">
+  <li data-target="#main-info" data-slide-to="0" class="active"></li>
+  <li data-target="#main-info" data-slide-to="1"></li>
+  <li data-target="#main-info" data-slide-to="2"></li>
+  <li data-target="#main-info" data-slide-to="3"></li>
+ </ol>
+ <div class="carousel-inner" role="listbox">
+  <div class="item active" data-id="0">
+   <img data-src="holder.js/800x536?auto=yes&bg=333&fg=777&text={{ video.display_id }}" style="width: 100% !important;" />
+   <div class="carousel-caption">
+    <p>{{ video.title }}</p>
+    <ul style="text-align: left;">
+     <li>Released: {{ video.released_date }}</a></li>
+     <li>Runtime: {{ video.runtime }}</a></li>
+     <li>Maker: <a href="{% url 'article' 'm' video.maker.pk %}" >{{ video.maker }}</a></li>
+    </ul>
+   </div>
+  </div>
+  <div class="item" data-id="1">
+   <img data-src="holder.js/800x536?auto=yes&bg=333&fg=333" style="width: 100% !important;" />
+   <div class="carousel-caption">
+    <ul style="text-align: left;">
+     {% if video.label %}<li>Label: <a href="{% url 'article' 'l' video.label.pk %}" >{{ video.label }}</a></li>{% endif %}
+     {% if video.series %}<li>Series: <a href="{% url 'article' 's' video.series.pk %}" >{{ video.series }}</a></li>{% endif %}
+	 <li>Actresses: {% for a in video.actresses.all %}<a href="{% url 'article' 'a' a.pk %}" >{{ a.name }}</a> {% empty %}-{% endfor %}</li>
+	 <li>Tags: {% for t in video.tags.all %}<a href="{% url 'article' 't' t.pk %}" >{{ t.name }}</a> {% empty %}-{% endfor %}</li>
+	</ul>
+   </div>
+  </div>
+  <div class="item" data-id="2">
+   <img src="{{ video.cover }}" style="width: 100% !important;" />
+  </div>
+  <div class="item" data-id="3" align="center" >
+   <video style="padding: 5% 2% 10% 2% !important; width: 100% !important;" controls >
+    <source src="{{ video.s_vid }}" type="video/mp4" />
+   </video>
+  </div>
+ </div>
+ <a class="left carousel-control" href="#main-info" role="button" data-slide="prev" style="width: 30px;" >
+  <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+ </a>
+ <a class="right carousel-control" href="#main-info" role="button" data-slide="next" style="width: 30px;" >
+  <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+ </a>
+</div>
+</div>
+{% endblock %}
