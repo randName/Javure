@@ -1,0 +1,13 @@
+<thead>
+ <tr>
+ {% for p in pager.thead %}
+  <th>{% if p == "_id" %}ID{% else %}{{ p | capfirst | cut:"_date" }}{% endif %}
+  {% for i in "01"|make_list %}
+   <a href="?s={% cycle '-' '' %}{{ p }}">
+    <span class="glyphicon glyphicon-arrow-{% cycle 'up' 'down' %}"></span>
+   </a>
+  {% endfor %}
+  </th>
+ {% endfor %}
+ </tr>
+</thead>
