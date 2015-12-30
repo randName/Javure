@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
+from django.apps import get_model
 from library.models import *
 
 import sys
@@ -7,7 +8,7 @@ sys.path.insert(0, '/home/ec2-user/JAV-scraper')
 from DMM import DMM
 
 class Command(BaseCommand):
-    help = 'Scrapes the DMM website'
+    help = 'Updates from the DMM website'
 
     def add_arguments(self, parser):
         parser.add_argument('article', type=str)
@@ -15,22 +16,16 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        def get_model( article, m_id ):
+        def get_obj( article, a_id ):
 
-            prop = {
-                'maker': Maker, 'label': Label, 'series': Series,
-                'director': Director, 'actress': Actress, 'keyword': Tag
-            }
-
-            model = prop[article]
+            model = get_model( 'library', article )
 
             try:
-                return model.objects.get(_id=m_id)
+                return model.objects.get(_id=a_id)
             except model.DoesNotExist:
-                title = dmm.get_title( article, m_id )
-                self.stdout.write("New %s: %s (%s)" % (article, title, m_id))
-                model_object = model(_id=m_id,name=title)
-
+                title = dmm.get_title( article, a_id )
+                # self.stdout.write("New %s: %s (%s)" % (article, title, m_id))
+                model_object = model(_id=a_id,name=title)
                 model_object.save()
 
                 return model_object
@@ -46,10 +41,10 @@ class Command(BaseCommand):
                 if not video.display_id: return ( 1, v['pid'] )
 
                 for a in ( 'maker', 'label', 'series' ):
-                   if a in v: setattr(video, a, get_model( a, v[a] ) )
+                   if a in v: setattr(video, a, get_obj( a, v[a] ) )
 
-                for t in v['tags']: video.tags.add( get_model( 'keyword', t ) )
-                for a in v['actresses']: video.actresses.add( get_model( 'actress', a ) )
+                for k in v['keywords']: video.keywords.add( get_obj( 'keyword', k ) )
+                for a in v['actresses']: video.actresses.add( get_obj( 'actress', a ) )
 
                 video.save()
 
@@ -58,7 +53,7 @@ class Command(BaseCommand):
         article = options['article']
 
         if article != 'maker':
-            self.stdout.write("Error: %s Only maker is supported now" % (article,))
+            self.stdout.write("Error: %s - Only maker is supported now" % article )
             return
 
         dmm = DMM()

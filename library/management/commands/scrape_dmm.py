@@ -17,49 +17,22 @@ class Command(BaseCommand):
         dmm = DMM()
 
         for target in options['scrape_targets']:
-            if target == 'tags':
-                self.stdout.write("Scraping tags from DMM...")
+            if target == 'keywords':
+                self.stdout.write("Scraping keywords from DMM...")
 
-                switcher = {
-                    'その他': Tag.MISC,
-                    'プレイ': Tag.PLAY,
-                    'ジャンル': Tag.GENRE,
-                    'コスチューム': Tag.COSTUME,
-                    'ＡＶ女優タイプ': Tag.ATYPE,
-                    'シチュエーション': Tag.SITUATION,
-                }
-
-                for tag_id, info in dmm.get_tags().items():
-                    try:
-                        tag = Tag.objects.get(_id=tag_id)
-                    except Tag.DoesNotExist:
-                        tag = Tag(_id=tag_id, name=info[0], category=switcher[info[1]] )
-
-                    tag.save()
+                for k in dmm.get_keywords(): Keyword.objects.get_or_create(**k)
 
             elif target == 'makers':
                 self.stdout.write("Scraping makers from DMM...")
 
                 for mora in dmm.MORAS:
-                    for m_id, info in dmm.get_makers(mora).items():
-                        try:
-                            maker = Maker.objects.get(_id=m_id)
-                        except Maker.DoesNotExist:
-                            maker = Maker(_id=m_id, name=info[0] )
-
-                        maker.save()
+                    dmm.get_makers(mora, callback=lambda x: Maker.objects.get_or_create(**x) )
 
             elif target == 'actresses':
                 self.stdout.write("Scraping actresses from DMM...")
 
                 for mora in dmm.MORAS:
-                    for a_id, info in dmm.get_actresses(mora).items():
-                        try:
-                            actress = Actress.objects.get(_id=a_id)
-                        except Actress.DoesNotExist:
-                            actress = Actress(_id=a_id, name=info[0], roma=info[1] )
-
-                        actress.save()
+                    dmm.get_actresses(mora, callback=lambda x: Actress.objects.get_or_create(**x) ) )
 
             else:
                 self.stdout.write("Error: Scrape target '%s' not recognised" % target)
