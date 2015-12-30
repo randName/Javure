@@ -1,11 +1,4 @@
 from django.contrib import admin
+from django.apps import apps
 
-from .models import Maker, Label, Series, Director, Tag, Actress, Video 
-
-admin.site.register(Maker)
-admin.site.register(Label)
-admin.site.register(Series)
-admin.site.register(Director)
-admin.site.register(Tag)
-admin.site.register(Actress)
-admin.site.register(Video)
+for model in apps.get_app_config('library').get_models(): admin.site.register(model)
