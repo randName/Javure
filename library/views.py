@@ -113,10 +113,8 @@ def article(request, article, a_id):
     if a_id:
         hd = ( 'cid', 'title', 'released_date' )
 
-        if model == 'actress':
-            q = 'actresses'
-        elif model == 'keyword':
-            q = 'keywords'
+        if model == 'actress' or model == 'keyword':
+            q = model_o._meta.verbose_name_plural.lower()
         else:
             q = '%s__pk' % model 
 
