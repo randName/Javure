@@ -48,7 +48,7 @@
 		    Articles<span class="caret"></span>
 		   </a>
 		   <ul class="dropdown-menu">
-		    {% with "maker label series actress tag" as list %}
+		    {% with "maker label series actress keyword" as list %}
 		     {% for a in list.split %}<li><a href="/{{ a | first }}">{{ a | capfirst }}</a></li>{% endfor %}
 			{% endwith %}
 		   </ul>

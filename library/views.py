@@ -1,9 +1,8 @@
-from django.shortcuts import render, redirect
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.core.exceptions import FieldError
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.db.models import Count
-from socket import gethostname
+from django.apps import apps
 from json import dumps
 from .models import *
 
@@ -64,7 +63,7 @@ def ajax(request):
 
     data = dumps(videos) 
     if 'callback' in request.GET:
-        data = "%s(%s)" % (request.GET['callback'], data)
+        data = "%s(%s)" % (request.GET.get('callback'), data)
         return HttpResponse(data, content_type='text/javascript')
 
     return HttpResponse('', content_type='text/javascript')
@@ -102,27 +101,31 @@ def video_page(request, cid):
 
 def article(request, article, a_id):
 
-    prop = { 'maker': Maker, 'label': Label, 'series': Series, 'director': Director, 'actresses': Actress, 'tags': Tag }
-
-    for k,v in prop.items():
-        if k.startswith(article):
-            a_model = (k,v)
+    for m in apps.get_app_config('library').get_models():
+        model = m.__name__.lower()
+        if model.startswith(article):
+            model_o = m
             break
 
     sort = request.GET.get('s') 
+    page = request.GET.get('p') 
 
     if a_id:
         hd = ( 'cid', 'title', 'released_date' )
 
-        videos_list = Video.objects.filter(**{ "%s__pk" % a_model[0] : a_id })
+        if model == 'actress':
+            q = 'actresses'
+        elif model == 'keyword':
+            q = 'keywords'
+        else:
+            q = '%s__pk' % model 
+
+        videos_list = Video.objects.filter(**{ q : a_id })
 
         l_sorted, videos_list = get_sort( videos_list, hd, sort )
+        videos = get_page( videos_list, page )
 
-        videos = get_page( videos_list, request.GET.get('p') )
-
-        if len(videos) == 0: return show_error( request, "%s does not exist" % a_id )
-
-        videos.title = "%s - %s" % ( a_model[0], getattr( videos[0], a_model[0] ).name )
+        videos.title = "%s - %s" % ( model, model_o.objects.get(_id=a_id).name )
         videos.thead = hd
         if l_sorted: videos.sort = sort
 
@@ -131,26 +134,19 @@ def article(request, article, a_id):
     else:
         hd = ( '_id', 'name', 'count' )
 
-        models_list = a_model[1].objects.annotate(count=Count('video')).all()
+        models_list = model_o.objects.annotate(count=Count('video')).all()
 
         l_sorted, models_list = get_sort( models_list, hd, sort )
+        models = get_page( models_list, page )
 
-        models = get_page( models_list, request.GET.get('p') )
-
-        models.title = a_model[0]
+        models.title = model
         models.thead = hd
         if l_sorted: models.sort = sort
 
         return render(request, "library/article.html", { 'pager': models } )
 
 def article_page(request, article):
-    if article == "tags":
-
-        tags = Tag.objects.annotate(count=Count('video')).all()
-
-        return render(request, "library/tags.html", { 'tags': tags })
-    else:
-        return home(request)
+    return home(request)
 
 def stats(request):
     return home(request)

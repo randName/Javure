@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
-from django.apps import get_model
+from django.apps import apps
 from library.models import *
 
 import sys
@@ -18,7 +18,7 @@ class Command(BaseCommand):
 
         def get_obj( article, a_id ):
 
-            model = get_model( 'library', article )
+            model = apps.get_model( 'library', article )
 
             try:
                 return model.objects.get(_id=a_id)

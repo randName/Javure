@@ -33,7 +33,7 @@
      {% if video.label %}<li>Label: <a href="{% url 'article' 'l' video.label.pk %}" >{{ video.label }}</a></li>{% endif %}
      {% if video.series %}<li>Series: <a href="{% url 'article' 's' video.series.pk %}" >{{ video.series }}</a></li>{% endif %}
 	 <li>Actresses: {% for a in video.actresses.all %}<a href="{% url 'article' 'a' a.pk %}" >{{ a.name }}</a> {% empty %}-{% endfor %}</li>
-	 <li>Tags: {% for t in video.tags.all %}<a href="{% url 'article' 't' t.pk %}" >{{ t.name }}</a> {% empty %}-{% endfor %}</li>
+	 <li>Tags: {% for k in video.keywords.all %}<a href="{% url 'article' 'k' k.pk %}" >{{ k.name }}</a> {% empty %}-{% endfor %}</li>
 	</ul>
    </div>
   </div>
