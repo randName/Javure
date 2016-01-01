@@ -1,7 +1,7 @@
 function search() {
 		if ( this.value.length < 3 ) { return; }
 		$.ajax({
-				url: 'http://pxy.randna.me:8080/ajax?q=' + this.value,
+				url: SEARCH_URL + '?q=' + this.value,
 				dataType: 'jsonp', success: function(r) {
 						$('#results').empty();
 						for (var i = 0; i < r.length; i++) {

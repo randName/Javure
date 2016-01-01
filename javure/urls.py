@@ -21,5 +21,9 @@ from .views import *
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^(?P<filename>(robots|humans).txt)$', home_files, name='home-files'),
-    url(r'', include('library.urls')),
+    url(r'^login/$', 'django.contrib.auth.views.login', {'template_name': 'admin/login.html'}),
+    url(r'^logout/$', 'django.contrib.auth.views.logout' ),
+    url(r'^library/', include('library.urls')),
+    url(r'^colle/', include('collection.urls')),
+    url(r'^$', home, name='home'),
 ]
