@@ -29,9 +29,9 @@ def vid_url_fx(in_sch):
         # sm dm dmb
         return lambda i: "http://cc3001.dmm.co.jp/litevideo/freepv/%s/%s/%s/%s_dmb_w.mp4" % (i[0],i[0:3],i,i)
 
-def get_page( object_list, page ):
+def get_page( object_list, page, per_page=50 ):
     
-    paginator = Paginator( object_list, 50 )
+    paginator = Paginator( object_list, per_page )
 
     try:
         return paginator.page(page)
@@ -120,14 +120,25 @@ def article(request, article, a_id):
 
         videos_list = Video.objects.filter(**{ q : a_id })
 
-        l_sorted, videos_list = get_sort( videos_list, hd, sort )
-        videos = get_page( videos_list, page )
+        if request.GET.get('c'):
+            get_img_url = img_url_fx(in_school(request))
 
-        videos.title = "%s - %s" % ( model, model_o.objects.get(_id=a_id).name )
-        videos.thead = hd
-        if l_sorted: videos.sort = sort
+            videos = get_page( videos_list, page, per_page=12 )
+            for v in videos: v.cover = get_img_url( v.pid, 'pl' )
 
-        return render(request, "library/list.html", { 'pager': videos } )
+            videos.title = "%s - %s" % ( model, model_o.objects.get(_id=a_id).name )
+            videos.carousel = 1
+
+            return render(request, "library/article_carousel.html", { 'pager': videos } )
+        else:
+            l_sorted, videos_list = get_sort( videos_list, hd, sort )
+            videos = get_page( videos_list, page )
+
+            videos.title = "%s - %s" % ( model, model_o.objects.get(_id=a_id).name )
+            videos.thead = hd
+            if l_sorted: videos.sort = sort
+
+            return render(request, "library/list.html", { 'pager': videos } )
 
     else:
         hd = ( '_id', 'name', 'count' )

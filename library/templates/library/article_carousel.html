@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block head_title %}{{ pager.title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+{% include "pagination" %}
+ <div id="main-info" class="carousel slide" data-ride="carousel" data-interval="false" >
+  <ol class="carousel-indicators">
+   {% for v in pager %}
+   <li data-target="#main-info" data-slide-to="{{ forloop.counter0 }}" {% if forloop.first %}class="active"{% endif %}></li>
+   {% endfor %}
+  </ol>
+  <div class="carousel-inner" role="listbox">
+   {% for v in pager %}
+   <div class="item{% if forloop.first %} active{% endif %}" data-id="{{ forloop.counter0 }}">
+    <img src="{{ v.cover }}" style="width: 100% !important;" />
+    <div class="carousel-caption">
+     <h1><a href="{% url 'video_page' cid=v.cid %}" >{{ v.display_id }}</a></h1>
+     <p>{{ v.title | truncatechars:20 }}</p>
+    </div>
+   </div>
+   {% endfor %}
+  </div>
+  <a class="left carousel-control" href="#main-info" role="button" data-slide="prev" style="width: 30px" >
+   <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+  </a>
+  <a class="right carousel-control" href="#main-info" role="button" data-slide="next" style="width: 30px" >
+   <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+  </a>
+ </div>
+</div>
+{% endblock %}
+
