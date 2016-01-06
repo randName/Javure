@@ -154,7 +154,13 @@ def article(request, article, a_id):
 
         return render(request, "library/article.html", { 'pager': models } )
 
-def article_page(request, article):
+def keywords(request):
+    return home(request)
+
+def actresses(request):
+    return home(request)
+
+def articlepage(request, article):
     return home(request)
 
 def stats(request):
