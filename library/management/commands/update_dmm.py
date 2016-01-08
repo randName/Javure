@@ -17,15 +17,14 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         def get_obj( article, a_id ):
-
             model = apps.get_model( 'library', article )
 
             try:
                 return model.objects.get(_id=a_id)
             except model.DoesNotExist:
-                title = dmm.get_title( article, a_id )
-                # self.stdout.write("New %s: %s (%s)" % (article, title, m_id))
-                model_object = model(_id=a_id,name=title)
+                item = dmm.get_article( 'digital/videoa', article, a_id )
+                model_object = model(_id=a_id,name=item['name'])
+                if article == "actress": model_object.furi = item['furi']
                 model_object.save()
 
                 return model_object
@@ -60,10 +59,10 @@ class Command(BaseCommand):
 
         for a_id in options['id']:
             works_c = Video.objects.filter(**{ "%s__pk" % article : a_id }).count()
-            n_works = dmm.get_count( 0, article, a_id )
+            n_works = dmm.get_article( 'digital/videoa', article, a_id )['count']
             self.stdout.write("Getting %d/%d works from %s %s ..." %(works_c,n_works,article,a_id))
 
-            retvals = dmm.get_works( 0, a_id, n_works - works_c, callback = import_video )
+            retvals = dmm.get_works('digital/videoa',a_id,n_works-works_c,callback=import_video)
             self.stdout.write(' ,'.join( em for ec,em in retvals if ec ))
         
         self.stdout.write("Done")
