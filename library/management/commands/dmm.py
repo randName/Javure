@@ -2,9 +2,6 @@ from django.core.management.base import BaseCommand, CommandError
 from django.apps import apps
 from library.models import *
 
-import sys
-sys.path.insert(0, '/home/ec2-user/JAV-scraper')
-
 from DMM import DMM
 
 class Command(BaseCommand):

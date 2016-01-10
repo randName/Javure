@@ -32,6 +32,8 @@ SECRET_KEY = get_env_variable('DJANGO_SECRET_KEY')
 
 ALLOWED_HOSTS = []
 
+import sys
+sys.path.insert( 1, get_env_variable('DMM_PATH') )
 
 # Application definition
 
