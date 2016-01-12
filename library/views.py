@@ -6,6 +6,8 @@ from django.apps import apps
 from json import dumps
 from .models import *
 
+from DMM import DMM
+
 def in_school(req):
     school_ips = ( '202.94.70.25', '103.24.77.25' )
 
@@ -14,20 +16,13 @@ def in_school(req):
 
     return ( addr in school_ips )
 
-def img_url_fx(in_sch):
+def get_domain( in_sch, s='pics' ):
 
-    if in_sch:
-        return lambda i, s: "http://pxy.randna.me:3000/%s?%s" % (i,s)
-    else:
-        return lambda i, s: "http://pics.dmm.co.jp/digital/video/%s/%s%s.jpg" % (i,i,s)
+    if in_sch: return "http://pxy.randna.me:3000/"
 
-def vid_url_fx(in_sch):
+    if s == 'v': s = 'cc3001'
 
-    if in_sch:
-        return lambda i: "" 
-    else:
-        # sm dm dmb
-        return lambda i: "http://cc3001.dmm.co.jp/litevideo/freepv/%s/%s/%s/%s_dmb_w.mp4" % (i[0],i[0:3],i,i)
+    return "http://%s.dmm.co.jp/" % s
 
 def get_page( object_list, page, per_page=50 ):
     
@@ -81,17 +76,16 @@ def home(request):
 def video_page(request, cid):
 
     if cid:
+        dmm = DMM()
         in_sch = in_school(request)
-        get_img_url = img_url_fx(in_sch)
-        get_vid_url = vid_url_fx(in_sch)
 
         try:
             video = Video.objects.get(cid=cid)
         except Video.DoesNotExist:
             return show_error( request, "Video %s does not exist" % cid )
 
-        video.cover = get_img_url( video.pid, 'pl' )
-        video.s_vid = get_vid_url( video.cid )
+        video.cover = get_domain( in_sch ) + dmm.get_image_path( dmm.DOMAIN[0], video.pid, 'pl' )
+        video.s_vid = get_domain( in_sch, 'v' ) + dmm.get_sample_vid_path( video.cid )[1]
 
     else:
         videos = Video.objects.all()[:12]
@@ -121,10 +115,11 @@ def article(request, article, a_id):
         videos_list = Video.objects.filter(**{ q : a_id })
 
         if request.GET.get('c'):
-            get_img_url = img_url_fx(in_school(request))
+            dmm = DMM()
+            domain = get_domain( in_school(request) )
 
             videos = get_page( videos_list, page, per_page=12 )
-            for v in videos: v.cover = get_img_url( v.pid, 'pl' )
+            for v in videos: v.cover = domain + dmm.get_image_path( dmm.DOMAIN[0], v.pid, 'pl' )
 
             videos.title = "%s - %s" % ( model, model_o.objects.get(_id=a_id).name )
             videos.carousel = 1
