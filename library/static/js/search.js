@@ -6,7 +6,7 @@ function search() {
 						$('#results').empty();
 						for (var i = 0; i < r.length; i++) {
 								var option = document.createElement('option');
-								option.id = r[i][0]; option.value = r[i][1];
+								option.id = r[i]; option.value = r[i];
 								$('#results').append(option);
 						}
 				}

@@ -10,7 +10,7 @@
   <tbody>
   {% for v in pager %}
    <tr>
-    <td><a href="{% url 'video_page' cid=v.cid %}" >{{ v.display_id }}</a></td>
+    <td><a href="{% url 'video_page' vid=v.pk %}" >{{ v.pk }}</a></td>
     <td>{{ v.title | truncatechars:30 }}</td><td>{{ v.released_date }}</td>
    </tr>
   {% endfor %}

@@ -58,10 +58,7 @@ class Actress(Article):
 
 class Video(models.Model):
 
-    pid = models.SlugField( 'Product ID', primary_key=True )
-    cid = models.SlugField( 'Content ID' )
-
-    display_id = models.SlugField( 'Display ID', max_length=20 )
+    _id = models.SlugField( 'ID', primary_key=True, max_length=20 )
     released_date = models.DateField( 'Released Date' )
     runtime = models.DurationField()
     title = models.TextField()
@@ -74,7 +71,26 @@ class Video(models.Model):
     actresses = models.ManyToManyField( Actress, blank=True )
 
     def __str__(self):
-        return self.display_id
+        return self._id
 
     class Meta:
         ordering = ['-released_date']
+
+class Content(models.Model):
+
+    cid = models.SlugField( 'Content ID', primary_key=True )
+    pid = models.SlugField( 'Product ID' )
+
+    DIGITAL = 0
+    MONO = 1
+
+    REALMS = (
+        (DIGITAL, 'Digital'),
+        (MONO, 'DVD'),
+    )
+
+    realm = models.PositiveIntegerField( choices=REALMS, default=DIGITAL )
+    video = models.ForeignKey( Video, on_delete=models.CASCADE )
+
+    def __str__(self):
+        return self.cid

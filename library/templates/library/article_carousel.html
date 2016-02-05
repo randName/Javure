@@ -16,7 +16,7 @@
    <div class="item{% if forloop.first %} active{% endif %}" data-id="{{ forloop.counter0 }}">
     <img src="{{ v.cover }}" style="width: 100% !important;" />
     <div class="carousel-caption">
-     <h1><a href="{% url 'video_page' cid=v.cid %}" >{{ v.display_id }}</a></h1>
+     <h1><a href="{% url 'video_page' vid=v.pk %}" >{{ v.pk }}</a></h1>
      <p>{{ v.title | truncatechars:20 }}</p>
     </div>
    </div>

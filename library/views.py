@@ -8,21 +8,20 @@ from .models import *
 
 from DMM import DMM
 
-def in_school(req):
-    school_ips = ( '202.94.70.25', '103.24.77.25' )
+def get_domain( req ):
+
+    pxy = "http://dmm-proxy.herokuapp.com/"
+    dmm = "http://%s.dmm.co.jp/"
+
+    school_ips = ( '202.94.70.51', '103.24.77.25', '202.94.70.25' )
 
     for f in ( 'REMOTE_ADDR', 'HTTP_X_FORWARDED_FOR' ):
         if f in req.META: addr = req.META[f]
 
-    return ( addr in school_ips )
-
-def get_domain( in_sch, s='pics' ):
-
-    if in_sch: return "http://pxy.randna.me:3000/"
-
-    if s == 'v': s = 'cc3001'
-
-    return "http://%s.dmm.co.jp/" % s
+    if addr in school_ips:
+        return ( pxy, pxy )
+    else:
+        return [ dmm % s for s in ( 'pics', 'cc3001' ) ]
 
 def get_page( object_list, page, per_page=50 ):
     
@@ -45,15 +44,29 @@ def get_sort( object_list, sort_keys, sort ):
 
     return False, object_list
 
+def get_video( vid ):
+
+        try:
+            video = Video.objects.get(_id=vid)
+        except Video.DoesNotExist:
+            return None
+
+        dmm = DMM()
+        c = video.content_set.first()
+        video.cover = dmm.get_image_path( dmm.REALM[c.realm], c.pid, 'pl' )
+        video.s_vid = dmm.get_sample_vid_path( c.cid )
+
+        return video
+
 def show_error(request, errmsg=""):
     return render(request, "404.html", { 'error': errmsg } )
 
-def ajax(request):
+def search(request):
     q = request.GET.get('q')
     if not q:
         videos = []
     else:
-        vq = Video.objects.values_list('cid','display_id').filter(display_id__icontains=q)[:10]
+        vq = Video.objects.values_list('pk',flat=True).filter(pk__icontains=q)[:10]
         videos = list(vq)
 
     data = dumps(videos) 
@@ -63,35 +76,22 @@ def ajax(request):
 
     return HttpResponse('', content_type='text/javascript')
 
-
 def home(request):
 
-    # videos = Video.objects.all()[:10]
-    # makers = Maker.objects.annotate(count=Count('video')).order_by('-count')[:10]
+    if 'vid' in request.GET: return redirect('video_page', vid=request.GET.get('vid'))
 
-    if 'cid' in request.GET: return redirect('video_page', cid=request.GET.get('cid'))
+    return render(request, "library/index.html")
 
-    return render(request, "library/index.html") # , { 'videos': videos, 'makers': makers } )
+def video_page(request, vid):
 
-def video_page(request, cid):
-
-    if cid:
-        dmm = DMM()
-        in_sch = in_school(request)
-
-        try:
-            video = Video.objects.get(cid=cid)
-        except Video.DoesNotExist:
-            return show_error( request, "Video %s does not exist" % cid )
-
-        video.cover = get_domain( in_sch ) + dmm.get_image_path( dmm.DOMAIN[0], video.pid, 'pl' )
-        video.s_vid = get_domain( in_sch, 'v' ) + dmm.get_sample_vid_path( video.cid )[1]
-
-    else:
+    if not vid:
         videos = Video.objects.all()[:12]
         return render(request, "library/index.html", { 'videos': videos } )
 
-    return render(request, "library/video.html", { 'video': video } )
+    video = get_video( vid )
+    if not video: return show_error( request, "Video %s does not exist" % vid )
+
+    return render(request, "library/video.html", { 'video': video, 'domain': get_domain(request) })
 
 def article(request, article, a_id):
 
@@ -105,7 +105,7 @@ def article(request, article, a_id):
     page = request.GET.get('p') 
 
     if a_id:
-        hd = ( 'cid', 'title', 'released_date' )
+        hd = ( '_id', 'title', 'released_date' )
 
         if model == 'actress' or model == 'keyword':
             q = model_o._meta.verbose_name_plural.lower()
@@ -116,10 +116,12 @@ def article(request, article, a_id):
 
         if request.GET.get('c'):
             dmm = DMM()
-            domain = get_domain( in_school(request) )
+            domain = get_domain( request )[0]
 
             videos = get_page( videos_list, page, per_page=12 )
-            for v in videos: v.cover = domain + dmm.get_image_path( dmm.DOMAIN[0], v.pid, 'pl' )
+            for v in videos:
+                c = v.content_set.first()
+                v.cover = domain + dmm.get_image_path( dmm.REALM[c.realm], c.pid, 'pl' )
 
             videos.title = "%s - %s" % ( model, model_o.objects.get(_id=a_id).name )
             videos.carousel = 1
@@ -148,15 +150,3 @@ def article(request, article, a_id):
         if l_sorted: models.sort = sort
 
         return render(request, "library/article.html", { 'pager': models } )
-
-def keywords(request):
-    return home(request)
-
-def actresses(request):
-    return home(request)
-
-def articlepage(request, article):
-    return home(request)
-
-def stats(request):
-    return home(request)

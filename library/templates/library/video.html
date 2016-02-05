@@ -3,7 +3,7 @@
 {% block head_css %}
 <style>@media all and (max-width: 500px) { div.carousel-caption { font-size:9px; } }</style>
 {% endblock %}
-{% block head_title %}{{ video.display_id }}{% endblock %}
+{% block head_title %}{{ video.pk }}{% endblock %}
 
 {% block content %}
 <div class="container">
@@ -16,7 +16,7 @@
  </ol>
  <div class="carousel-inner" role="listbox">
   <div class="item active" data-id="0">
-   <img data-src="holder.js/800x536?auto=yes&bg=333&fg=777&text={{ video.display_id }}" style="width: 100% !important;" />
+   <img data-src="holder.js/800x536?auto=yes&bg=333&fg=777&text={{ video.pk }}" style="width: 100% !important;" />
    <div class="carousel-caption">
     <p>{{ video.title }}</p>
     <ul style="text-align: left;">
@@ -38,11 +38,11 @@
    </div>
   </div>
   <div class="item" data-id="2">
-   <img src="{{ video.cover }}" style="width: 100% !important;" />
+   <img src="{{ domain.0 }}{{ video.cover }}" style="width: 100% !important;" />
   </div>
   <div class="item" data-id="3" align="center" >
    <video style="padding: 5% 2% 10% 2% !important; width: 100% !important;" controls >
-    <source src="{{ video.s_vid }}" type="video/mp4" />
+    <source src="{{ domain.1 }}{{ video.s_vid }}" type="video/mp4" />
    </video>
   </div>
  </div>
