@@ -11,13 +11,18 @@ class Command(BaseCommand):
         parser.add_argument( 'action', type=str )
         parser.add_argument( 'article', type=str )
 
-        parser.add_argument( '-d', '--domain', default='digital/videoa', type=str )
+        parser.add_argument( '-r', '--realm', default='digital/videoa', type=str )
         parser.add_argument( '-i', '--id', nargs='*', type=int )
 
     def handle(self, *args, **options):
 
         def get_obj( article, a_id ):
             model = apps.get_model( 'library', article )
+
+            if a_id is None: return
+
+            if isinstance(a_id, dict):
+                return model.objects.get_or_create(**a_id)
 
             try:
                 return model.objects.get(_id=a_id)
@@ -30,14 +35,14 @@ class Command(BaseCommand):
                 return model_object
 
         def import_video( v ):
-            v_slicer = ( 'cid', 'pid', 'title', 'display_id', 'runtime', 'released_date' )
+            v_slicer = ( '_id', 'title', 'runtime', 'released_date' )
+
+            if not v['_id']: return ( 1, v['cid'] )
 
             try:
-                video = Video.objects.get(pid=v['pid'])
+                video = Video.objects.get(_id=v['_id'])
             except Video.DoesNotExist:
                 video = Video(**{ k: v[k] for k in v_slicer })
-
-                if not video.display_id: return ( 1, v['pid'] )
 
                 for a in ( 'maker', 'label', 'series' ):
                    if a in v: setattr(video, a, get_obj( a, v[a] ) )
@@ -47,34 +52,42 @@ class Command(BaseCommand):
 
                 video.save()
 
+            try:
+                content = Content.objects.get(cid=v['cid'])
+            except Content.DoesNotExist:
+                content = Content(**{ k: v[k] for k in ( 'cid', 'pid', 'realm' ) })
+                content.video = video
+
+                content.save()
+
             return ( None, None )
 
         dmm = DMM()
 
         action = options['action']
         article = options['article']
-        domain = options['domain']
+        realm = options['realm']
         
         if action == 'scrape':
 
             if article == 'keyword':
                 self.stdout.write("Scraping keywords... ", ending="")
 
-                for k in dmm.get_keywords(): Keyword.objects.get_or_create(**k)
+                for k in dmm.get_keywords(): get_obj('keyword',k)
 
             elif article == 'maker':
                 self.stdout.write("Scraping makers...")
 
                 for mora in dmm.MORAS:
                     self.stdout.write( mora, ending="\r" )
-                    dmm.get_makers( mora, callback=lambda x: Maker.objects.get_or_create(**x) )
+                    dmm.get_makers( mora, callback=lambda x: get_obj('maker',x) )
 
             elif article == 'actress':
                 self.stdout.write("Scraping actresses...")
 
                 for mora in dmm.MORAS:
                     self.stdout.write( mora, ending="\r" )
-                    dmm.get_actresses( mora, callback=lambda x: Actress.objects.get_or_create(**x) )
+                    dmm.get_actresses( mora, callback=lambda x: get_obj('actress',x) )
 
             else:
                 self.stdout.write( "Error: Scrape article '%s' not recognised" % target )
@@ -106,20 +119,19 @@ class Command(BaseCommand):
 
             for a_id in options['id']:
                 works_c = Video.objects.filter(**{ "%s__pk" % article : a_id }).count()
-                n_works = dmm.get_article( domain, article, a_id )['count']
+                n_works = dmm.get_article( realm, article, a_id )['count']
 
-                self.stdout.write( "Status: %d/%d works from %s %s" % ( works_c, n_works, article, a_id ) )
+                self.stdout.write( "Status: %d/%d from %s %s" % (works_c,n_works,article,a_id) )
 
                 rem = n_works - works_c
 
                 if rem == 0:
                     self.stdout.write( "Nothing to do." )
-                    return
+                    continue
 
                 self.stdout.write( "Getting %d works..." % rem )
-                retvals = dmm.get_works( domain, a_id, rem, callback=import_video )
+                retvals = dmm.get_works( realm, a_id, rem, callback=import_video )
                 # self.stdout.write(' ,'.join( em for ec,em in retvals if ec ))
+                self.stdout.write( "\n" )
 
         self.stdout.write("Done")
-
-        return
