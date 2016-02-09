@@ -1,7 +1,7 @@
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from django.db.models import Count
+from django.db.models import Q, Count
 from django.apps import apps
 from json import dumps
 from .models import *
@@ -101,8 +101,9 @@ def article(request, article, a_id):
             model_o = m
             break
 
-    sort = request.GET.get('s') 
-    page = request.GET.get('p') 
+    sort = request.GET.get('s')
+    page = request.GET.get('p')
+    query = request.GET.get('q')
 
     if a_id:
         hd = ( '_id', 'title', 'released_date' )
@@ -110,7 +111,7 @@ def article(request, article, a_id):
         if model == 'actress' or model == 'keyword':
             q = model_o._meta.verbose_name_plural.lower()
         else:
-            q = '%s__pk' % model 
+            q = '%s__pk' % model
 
         videos_list = Video.objects.filter(**{ q : a_id })
 
@@ -138,6 +139,20 @@ def article(request, article, a_id):
             return render(request, "library/list.html", { 'pager': videos } )
 
     else:
+        if query:
+            data = {}
+
+            nameq = Q(name__icontains=query)
+            if model == 'actress':
+                nameq = nameq | Q(furi__icontains=query)
+
+            model_list = model_o.objects.filter( nameq )
+
+            data['items'] = list(model_list.values())
+            data['count'] = len(data['items'])
+
+            return HttpResponse(dumps(data), content_type='text/javascript')
+
         hd = ( '_id', 'name', 'count' )
 
         models_list = model_o.objects.annotate(count=Count('video')).all()
@@ -150,3 +165,26 @@ def article(request, article, a_id):
         if l_sorted: models.sort = sort
 
         return render(request, "library/article.html", { 'pager': models } )
+
+def actresses(request):
+
+    a = request.GET.get('a')
+    min_c = request.GET.get('min')
+    max_c = request.GET.get('max')
+
+    if not a: return article(request,'a','')
+
+    video_list = Video.objects.annotate(acts=Count('actresses'))
+
+    if max_c: video_list = video_list.filter(acts__lte=int(max_c))
+    if min_c: video_list = video_list.filter(acts__gte=int(min_c))
+
+    for actress in a.split(','):
+        video_list = video_list.filter(actresses=actress)
+
+    if video_list.count() > 50:
+        video_list = video_list[:50]
+
+    data = dumps( list( video_list.values_list('pk','acts') ) )
+
+    return HttpResponse(data, content_type='text/javascript')
