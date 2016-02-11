@@ -62,6 +62,20 @@ class Command(BaseCommand):
 
             return ( None, None )
 
+        def fix_video( video ):
+
+            self.stdout.write( video.pk, ending="\r" )
+
+            c = video.content_set.first()
+            w = dmm.get_work_page( dmm.REALM[c.realm], c.cid )
+
+            video.released_date = w['date']
+
+            d = 'director'
+            if d in w: setattr( video, d, get_obj( d, w[d] ) )
+
+            video.save()
+
         dmm = DMM()
 
         action = options['action']
@@ -132,6 +146,19 @@ class Command(BaseCommand):
                 self.stdout.write( "Getting %d works..." % rem )
                 retvals = dmm.get_works( realm, a_id, rem, callback=import_video )
                 # self.stdout.write(' ,'.join( em for ec,em in retvals if ec ))
+                self.stdout.write( "\n" )
+
+        elif action == 'fix':
+
+            if not options['id']:
+                self.stdout.write("Error: No IDs given")
+                return
+
+            for a_id in options['id']:
+                self.stdout.write( "Fixing videos from %s %s... " %( article, a_id ) )
+
+                for v in Video.objects.filter(**{ "%s__pk" % article : a_id }): fix_video( v )
+
                 self.stdout.write( "\n" )
 
         self.stdout.write("Done")
