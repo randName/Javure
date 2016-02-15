@@ -67,7 +67,7 @@ class Command(BaseCommand):
             self.stdout.write( video.pk, ending="\r" )
 
             c = video.content_set.first()
-            w = dmm.get_work_page( dmm.REALM[c.realm], c.cid )
+            w = dmm.get_work_page( c.realm, c.cid )
 
             video.released_date = w['date']
 

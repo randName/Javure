@@ -53,7 +53,7 @@ def get_video( vid ):
 
         dmm = DMM()
         c = video.content_set.first()
-        video.cover = dmm.get_image_path( dmm.REALM[c.realm], c.pid, 'pl' )
+        video.cover = dmm.get_image_path( c.realm, c.pid, 'pl' )
         video.s_vid = dmm.get_sample_vid_path( c.cid )
 
         return video
@@ -122,7 +122,7 @@ def article(request, article, a_id):
             videos = get_page( videos_list, page, per_page=12 )
             for v in videos:
                 c = v.content_set.first()
-                v.cover = domain + dmm.get_image_path( dmm.REALM[c.realm], c.pid, 'pl' )
+                v.cover = domain + dmm.get_image_path( c.realm, c.pid, 'pl' )
 
             videos.title = "%s - %s" % ( model, model_o.objects.get(_id=a_id).name )
             videos.carousel = 1
