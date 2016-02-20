@@ -11,7 +11,7 @@ class Command(BaseCommand):
         parser.add_argument( 'action', type=str )
         parser.add_argument( 'article', type=str )
 
-        parser.add_argument( '-r', '--realm', default='digital/videoa', type=str )
+        parser.add_argument( '-r', '--realm', default=0, type=int )
         parser.add_argument( '-i', '--id', nargs='*', type=int )
 
     def handle(self, *args, **options):
@@ -27,7 +27,7 @@ class Command(BaseCommand):
             try:
                 return model.objects.get(_id=a_id)
             except model.DoesNotExist:
-                item = dmm.get_article( 'digital/videoa', article, a_id )
+                item = dmm.get_article( 0, article, a_id )
                 model_object = model(_id=a_id,name=item['name'])
                 if article == "actress": model_object.furi = item['furi']
                 model_object.save()
