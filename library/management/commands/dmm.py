@@ -46,6 +46,7 @@ class Command(BaseCommand):
 
                 for a in ( 'maker', 'label', 'series' ):
                    if a in v: setattr(video, a, get_obj( a, v[a] ) )
+                video.save()
 
                 for k in v['keywords']: video.keywords.add( get_obj( 'keyword', k ) )
                 for a in v['actresses']: video.actresses.add( get_obj( 'actress', a ) )
