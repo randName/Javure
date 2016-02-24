@@ -3,7 +3,6 @@ from django.db import models
 class Article(models.Model):
 
     _id = models.PositiveIntegerField( 'ID', primary_key=True )
-    name = models.CharField( max_length=50 )
 
     def __str__(self):
         return self.name
@@ -13,23 +12,29 @@ class Article(models.Model):
 
 class Maker(Article):
 
+    name = models.CharField( max_length=50 )
     url = models.URLField( 'URL', blank=True )
     description = models.TextField( blank=True )
     roma = models.CharField( 'ローマ字', max_length=50, blank=True )
 
 class Label(Article):
-    pass
+
+    name = models.TextField()
 
 class Series(Article):
+
+    name = models.TextField()
 
     class Meta:
         verbose_name_plural = 'series'
 
 class Director(Article):
-    pass
+
+    name = models.CharField( max_length=50 )
 
 class Keyword(Article):
 
+    name = models.CharField( max_length=20 )
     SITUATION = 0
     ATYPE = 1
     COSTUME = 2
@@ -50,6 +55,7 @@ class Keyword(Article):
 
 class Actress(Article):
 
+    name = models.CharField( max_length=50 )
     roma = models.CharField( 'ローマ字', max_length=50, blank=True )
     furi = models.CharField( '振り仮名', max_length=20, blank=True )
 
