@@ -58,6 +58,7 @@ class Actress(Article):
     name = models.CharField( max_length=50 )
     roma = models.CharField( 'ローマ字', max_length=50, blank=True )
     furi = models.CharField( '振り仮名', max_length=20, blank=True )
+    alias = models.CharField( '別名', max_length=50, blank=True )
 
     class Meta:
         verbose_name_plural = 'actresses'

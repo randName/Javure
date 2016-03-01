@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand, CommandError
+from django.db.utils import DataError
 from django.apps import apps
 from library.models import *
 
@@ -12,6 +13,7 @@ class Command(BaseCommand):
         parser.add_argument( 'article', type=str )
 
         parser.add_argument( '-r', '--realm', default=0, type=int )
+        parser.add_argument( '-s', '--start', default=1, type=int )
         parser.add_argument( '-i', '--id', nargs='*', type=int )
 
     def handle(self, *args, **options):
@@ -29,8 +31,13 @@ class Command(BaseCommand):
             except model.DoesNotExist:
                 item = dmm.get_article( 0, article, a_id )
                 model_object = model(_id=a_id,name=item['name'])
-                if article == "actress": model_object.furi = item['furi']
-                model_object.save()
+                if article == "actress":
+                    model_object.furi = item.get( 'furi', '' )
+                    model_object.alias = item.get( 'alias', '' )
+                try:
+                    model_object.save()
+                except DataError:
+                    print( item )
 
                 return model_object
 
@@ -65,7 +72,7 @@ class Command(BaseCommand):
 
         def fix_video( video ):
 
-            self.stdout.write( video.pk, ending="\r" )
+            self.stdout.write( "\r%s  \t" % video.pk, ending="" )
 
             c = video.content_set.first()
             w = dmm.get_work_page( c.realm, c.cid )
@@ -82,6 +89,7 @@ class Command(BaseCommand):
         action = options['action']
         article = options['article']
         realm = options['realm']
+        start = options['start']
         
         if action == 'scrape':
 
@@ -105,7 +113,7 @@ class Command(BaseCommand):
                     dmm.get_actresses( mora, callback=lambda x: get_obj('actress',x) )
 
             else:
-                self.stdout.write( "Error: Scrape article '%s' not recognised" % target )
+                self.stdout.write( "Error: Scrape article '%s' not recognised" % article )
                 return
 
         elif action == 'reset':
@@ -133,7 +141,9 @@ class Command(BaseCommand):
                 return
 
             for a_id in options['id']:
-                works_c = Video.objects.filter(**{ "%s__pk" % article : a_id }).count()
+                m_works = Video.objects.filter(**{ "%s__pk" % article : a_id })
+                works_c = m_works.filter(content__realm__exact=realm).count()
+
                 n_works = dmm.get_article( realm, article, a_id )['count']
 
                 self.stdout.write( "Status: %d/%d from %s %s" % (works_c,n_works,article,a_id) )
@@ -144,8 +154,8 @@ class Command(BaseCommand):
                     self.stdout.write( "Nothing to do." )
                     continue
 
-                self.stdout.write( "Getting %d works..." % rem )
-                retvals = dmm.get_works( realm, a_id, rem, callback=import_video )
+                self.stdout.write( "Getting %d works from page %d..." % ( rem, start ) )
+                retvals = dmm.get_works( realm, a_id, rem, page=start, callback=import_video )
                 # self.stdout.write(' ,'.join( em for ec,em in retvals if ec ))
                 self.stdout.write( "\n" )
 
