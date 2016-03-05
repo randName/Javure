@@ -1,74 +1,28 @@
 {% load staticfiles %}
 <!doctype html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang=""> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8" lang=""> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9" lang=""> <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang=""> <!--<![endif]-->
-    <head>
-	{% block head_css %}{% endblock %}
-	{% block head_javascript %}{% endblock %}
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <title>{% block head_title %}{% endblock %}</title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-
-        <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
-	    <link rel="shortcut icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
-        <style>
-            body {
-				color: #eee;
-				background-color: #333;
-            }
-        </style>
-        <link rel="stylesheet" href="{% static 'css/bootstrap-theme.min.css' %}">
-        <link rel="stylesheet" href="{% static 'css/main.css' %}">
-
-        <script src="{% static 'js/vendor/modernizr-2.8.3-respond-1.4.2.min.js' %}"></script>
-    </head>
-    <body>
-{% block navbar %}
-    <nav class="navbar navbar-inverse navbar-static-top" role="navigation">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="/">Javure Library</a>
-        </div>
-        <div id="navbar" class="navbar-collapse collapse">
-		 <ul class="nav navbar-nav">
-		  <li class="dropdown">
-		   <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
-		    Articles<span class="caret"></span>
-		   </a>
-		   <ul class="dropdown-menu">
-		    {% with "maker label series director actress keyword" as list %}
-		     {% for a in list.split %}<li><a href="{% url 'article' a|first %}">{{ a | capfirst }}</a></li>{% endfor %}
-			{% endwith %}
-		   </ul>
-		  </li>
-		 </ul>
-		 <form class="navbar-form navbar-right" role="search">
-		  <div class="input-group">
-		   <input id="search" name="vid" class="form-control" type="text" list="results" placeholder="ID" />
-		   <datalist id="results"></datalist>
-		  </div>
-		 </form>
-        </div>
-      </div>
-    </nav>
-{% endblock %}
+<html class="no-js" lang="">
+ <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <title>{% block head_title %}{% endblock %}</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="shortcut icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.min.css">
+  <link rel="stylesheet" href="{% static 'css/bootstrap-solarized-dark.css' %}">
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+  {% block head_css %}{% endblock %}
+ </head>
+ <body>
+{% include "navbar.html" %}
 {% block content %}{% endblock %}
-{% block footer_javascript %}{% endblock %}
-    </div> <!-- /container --> 
-     	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-        <script>window.jQuery || document.write('<script src="static/js/vendor/jquery-1.11.2.min.js"><\/script>')</script>
-        <script src="{% static 'js/vendor/bootstrap.min.js' %}"></script>
-        <script src="{% static 'js/vendor/holder.min.js' %}"></script>
-        <script src="{% static 'js/main.js' %}"></script>
-		<script language="javascript">var SEARCH_URL = "{% url 'search' %}";</script>
-        <script src="{% static 'js/search.js' %}"></script>
-    </body>
+  <script>window.jQuery || document.write('<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"><\/script>')</script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/holder/2.9.3/holder.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.min.js"></script>
+  {% block footer_javascript %}{% endblock %}
+  <script src="{% static 'js/main.js' %}"></script>
+ </body>
 </html>

@@ -3,7 +3,7 @@
 {% block head_title %}{{ pager.title | capfirst }} listing{% endblock %}
 {% block content %}
 <div class="container">
-{% include "pagination" %}
+{% include "pagination.html" %}
  <table class="table table-condensed">
   {% include "thead" %}
   <tbody>
@@ -15,6 +15,6 @@
   {% endfor %}
   </tbody>
  </table>
-{% include "pagination" %}
+{% include "pagination.html" %}
 </div>
 {% endblock %}
