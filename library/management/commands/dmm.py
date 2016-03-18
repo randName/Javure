@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db.utils import DataError
+from django.db.models import Count
 from django.apps import apps
 from library.models import *
 
@@ -12,7 +13,6 @@ class Command(BaseCommand):
         parser.add_argument( 'action', type=str )
         parser.add_argument( 'article', type=str )
 
-        parser.add_argument( '-r', '--realm', default=0, type=int )
         parser.add_argument( '-s', '--start', default=1, type=int )
         parser.add_argument( '-i', '--id', nargs='*', type=int )
 
@@ -68,6 +68,8 @@ class Command(BaseCommand):
 
                 content.save()
 
+            fix_video( video )
+
             return ( None, None )
 
         def fix_video( video ):
@@ -88,7 +90,6 @@ class Command(BaseCommand):
 
         action = options['action']
         article = options['article']
-        realm = options['realm']
         start = options['start']
         
         if action == 'scrape':
@@ -137,12 +138,15 @@ class Command(BaseCommand):
                 return
 
             if not options['id']:
-                self.stdout.write("Error: No IDs given")
-                return
+                self.stdout.write("No IDs given, updating all")
+
+                maker_list = Maker.objects.annotate(count=Count('video'))
+                options['id'] = list( maker_list.filter(count__gt=0).values_list('pk',flat=True) )
 
             for a_id in options['id']:
-                m_works = Video.objects.filter(**{ "%s__pk" % article : a_id })
-                works_c = m_works.filter(content__realm__exact=realm).count()
+                works_l = Video.objects.filter(**{ "%s__pk" % article : a_id })
+                realm = works_l.first().content_set.first().realm
+                works_c = works_l.count()
 
                 n_works = dmm.get_article( realm, article, a_id )['count']
 
