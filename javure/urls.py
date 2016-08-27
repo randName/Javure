@@ -26,5 +26,5 @@ urlpatterns = [
     url(r'^logout/$', logout ),
     url(r'^library/', include('library.urls')),
     url(r'^colle/', include('collection.urls')),
-    url(r'^$', home, name='home'),
+    url(r'^$', home, name='jhome'),
 ]
