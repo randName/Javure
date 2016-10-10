@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block head_title %}Infinite Scroll{% endblock %}
+{% block content %}
+<div class="container">
+ <table id="results" class="table table-condensed">
+  <thead>
+   <tr><th>ID</th><th>Title</th><th>Released</th></tr>
+  </thead>
+  <tbody>
+   <tr>
+    <td>IDBD-696</td>
+    <td>「えっ、ここで挿れるの？」こんな場所で8時間もSEX！？</td>
+    <td>Feb. 14, 2016</td>
+   </tr>
+  </tbody>
+ </table>
+ <a class="next-page-link" href="?p=2" rel="next">Load More</a>
+</div>
+{% endblock %}
+{% block footer_javascript %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery.isotope/2.2.2/isotope.pkgd.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery.scroll4ever/1.0.0/jquery.scroll4ever.min.js"></script>
+<script>var VIDEO_URL = "{% url 'video_page' %}";</script>
+<script>var MEDIA_URL = "{% url 'media' %}";</script>
+<script>
+$(document).ready(function(){
+	$('#results').scroll4ever({
+		trigger: '.next-page-link',
+		container: 'tbody',
+		selector: 'tbody tr',
+		distance: 100,
+		debug: true,
+		start: function(){ $(".next-page-link").html('Loading...'); },
+		complete: function(){}
+	});
+});
+</script>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+{% block head_title %}Search{% endblock %}
+{% block head_css %}
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.1/css/select2.min.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/noUiSlider/8.3.0/nouislider.min.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.19/daterangepicker.min.css">
+<style>
+ .select2-selection--multiple {
+  background-color: #073642 !important;
+  border: 1px solid #586e75 !important;
+  color: #eee8d5 !important;
+ }
+ .select2-selection__choice { background-color: transparent !important; border: 1px solid #2aa198; }
+ .select2-results__options { background-color: #073642; }
+ .grid-item { float: left; width: 150px; }
+ .noUi-connect { background-color: #073642; }
+ .noUi-background { background-color: #002b36; }
+ .daterangepicker { background: #073642; }
+ .daterangepicker .calendar-table { background: #073642; }
+ .daterangepicker .td-active { background-color: #268bd2; }
+ a.darken img { opacity: 0.2; }
+ a.darken:hover img { opacity: 1; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="container">
+ <div class="form-group">
+ <div class="input-group">
+  <input id="search" type="text" class="form-control" placeholder="Search">
+  <span class="input-group-btn">
+   <button class="btn btn-default" href="#adv" data-toggle="collapse">
+    Advanced <span class="caret"></span>
+   </button>
+  </span>
+ </div>
+ </div>
+ <div id="adv" class="well collapse">
+  <div class="row">
+   <div class="col-sm-5">
+    <select id="filter" class="form-control" multiple="multiple" style="width:100%"></select>
+   </div>
+   <div class="col-sm-4">M2M Or：
+    <label class="checkbox-inline"><input type="checkbox" value="actress">出演者</label>
+    <label class="checkbox-inline"><input type="checkbox" value="keyword">ジャンル</label>
+   </div>
+   <div class="col-sm-3">
+    <input id="daterange" type="text" class="form-control" placeholder="Dates">
+   </div>
+  </div>
+  <div class="row">
+   <div class="col-sm-5"><div style="padding: 20px 20px 50px;"><div id="acts"></div></div></div>
+   <div class="col-sm-7"><div style="padding: 20px 20px 50px;"><div id="durs"></div></div></div>
+  </div>
+ </div>
+ <button id="darken" type="button" class="btn btn-default active">darken</button>
+ <hr />
+ <!-- <div class="btn-group btn-group-xs" role="group">
+  <button id="tooltip" type="button" class="btn btn-default">tooltip</button>
+ </div> -->
+ <div id="results"></div>
+</div>
+{% endblock %}
+{% block footer_javascript %}
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery.isotope/2.2.2/isotope.pkgd.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/select2/4.0.1/js/select2.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/noUiSlider/8.3.0/nouislider.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.19/moment.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-daterangepicker/2.1.19/daterangepicker.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jQuery.dotdotdot/1.7.4/jquery.dotdotdot.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.0/imagesloaded.pkgd.min.js"></script>
+<script>var VIDEO_URL = "{% url 'video_page' %}";</script>
+<script>var MEDIA_URL = "{% url 'media' %}";</script>
+<script>var CSRFTOKEN = "{{ csrf_token }}";</script>
+<script>var SEARCH_URL = "{% url 'search' %}";</script>
+<script src="{% static 'js/search.js' %}"></script>
+{% endblock %}

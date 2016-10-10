@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 {% block head_title %}{{ pager.title | capfirst }}{% endblock %}
-
 {% block content %}
 <div class="container">
 {% include "pagination.html" %}
@@ -10,7 +9,7 @@
   <tbody>
   {% for v in pager %}
    <tr>
-    <td><a href="{% url 'video_page' vid=v.pk %}" >{{ v.pk }}</a></td>
+    <td><a href="{% url 'video_page' vid=v.name %}" >{{ v.name }}</a></td>
     <td>{{ v.title | truncatechars:30 }}</td><td>{{ v.released_date }}</td>
    </tr>
   {% endfor %}
@@ -19,4 +18,3 @@
 {% include "pagination.html" %}
 </div>
 {% endblock %}
-

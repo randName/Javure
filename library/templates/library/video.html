@@ -1,58 +1,76 @@
 {% extends "base.html" %}
 {% load staticfiles %}
 {% block head_css %}
-<style>@media all and (max-width: 500px) { div.carousel-caption { font-size:9px; } }</style>
+<style>
+<!-- @media all and (max-width: 500px) { div.carousel-caption { font-size:9px; } } -->
+.carousel-inner > .item > img { margin:0 auto; height:none; }
+.carousel-control { width:20px; }
+</style>
 {% endblock %}
 {% block head_title %}{{ video.pk }}{% endblock %}
-
 {% block content %}
 <div class="container">
-<div id="main-info" class="carousel slide" data-ride="carousel" data-interval="false" >
- <ol class="carousel-indicators">
-  <li data-target="#main-info" data-slide-to="0" class="active"></li>
-  <li data-target="#main-info" data-slide-to="1"></li>
-  <li data-target="#main-info" data-slide-to="2"></li>
-  <li data-target="#main-info" data-slide-to="3"></li>
- </ol>
- <div class="carousel-inner" role="listbox">
-  <div class="item active" data-id="0">
-   <img data-src="holder.js/800x536?auto=yes&bg=333&fg=777&text={{ video.pk }}" style="width: 100% !important;" />
-   <div class="carousel-caption">
-    <p>{{ video.title }}</p>
-    <ul style="text-align: left;">
-     <li>Released: {{ video.released_date }}</a></li>
-     <li>Runtime: {{ video.runtime }}</a></li>
-     <li>Maker: <a href="{% url 'article' 'm' video.maker.pk %}" >{{ video.maker }}</a></li>
-    </ul>
+ <div class="panel panel-default">
+  <div class="panel-heading">
+   <a role="button" data-toggle="collapse" href="#cover">{{ video.title }}</a>
+  </div>
+  <div id="cover" class="panel-body panel-collapse collapse">
+   <img class="img-responsive" data-src="{% url 'media' %}?v={{ video.pk }}&s=pl" />
+  </div>
+  <ul class="list-group">
+   <li class="list-group-item">配信開始日：{{ video.released_date | date:"d/m/Y" }}</a></li>
+   <li class="list-group-item">収録時間：{{ video.runtime }}</a></li>
+   <li class="list-group-item">出演者：{% for a in video.actresses.all %}　<a href="{% url 'article' 'a' a.pk %}" >{{ a.name }}</a>{% empty %}-{% endfor %}</li>
+   {% if video.director %}<li class="list-group-item">監督：<a href="{% url 'article' 'd' video.director.pk %}" >{{ video.director }}</a></li>{% endif %}
+   {% if video.series %}<li class="list-group-item">シリーズ： <a href="{% url 'article' 's' video.series.pk %}" >{{ video.series }}</a></li>{% endif %}
+   <li class="list-group-item">メーカー： <a href="{% url 'article' 'm' video.maker.pk %}" >{{ video.maker }}</a></li>
+   {% if video.label %}<li class="list-group-item">レーベル： <a href="{% url 'article' 'l' video.label.pk %}" >{{ video.label }}</a></li>{% endif %}
+   <li class="list-group-item">ジャンル：{% for k in video.keywords.all %}　<a href="{% url 'article' 'k' k.pk %}" >{{ k.name }}</a>{% empty %}-{% endfor %}</li>
+  </ul>
+  <div class="panel-body">
+   <div id="spim" class="carousel slide" data-ride="carousel" data-interval="false" >
+    <ol class="carousel-indicators">
+     <li data-target="#spim" data-slide-to="0" class="active"></li>
+     {% for i in video.samples %}<li data-target="#spim" data-slide-to="{{ i }}"></li> {% endfor %}
+    </ol>
+    <div class="carousel-inner" role="listbox">
+     <div class="item active" data-id="0">
+      <div class="btn-group btn-group-xs" role="group">
+       <button id="v_dmb" type="button" class="btn btn-default">dmb</button>
+       <button id="v_dm" type="button" class="btn btn-default">dm</button>
+       <button id="v_sm" type="button" class="btn btn-default">sm</button>
+      </div>
+      <div class="embed-responsive embed-responsive-16by9">
+       <video id='samplevid' class="embed-responsive-item" controls></video>
+      </div>
+     </div>
+     {% for i in video.samples %}
+     <div class="item" data-id="{{ i }}">
+      <img class="img-responsive" data-src="{% url 'media' %}?v={{ video.pk }}&s=jp-{{ i }}" />
+     </div>
+     {% endfor %}
+    </div>
+    <a class="left carousel-control" href="#spim" role="button" data-slide="prev">
+     <span class="glyphicon glyphicon-chevron-left"></span>
+    </a>
+    <a class="right carousel-control" href="#spim" role="button" data-slide="next">
+     <span class="glyphicon glyphicon-chevron-right"></span>
+    </a>
    </div>
-  </div>
-  <div class="item" data-id="1">
-   <img data-src="holder.js/800x536?auto=yes&bg=333&fg=333" style="width: 100% !important;" />
-   <div class="carousel-caption">
-    <ul style="text-align: left;">
-     {% if video.label %}<li>Label: <a href="{% url 'article' 'l' video.label.pk %}" >{{ video.label }}</a></li>{% endif %}
-     {% if video.series %}<li>Series: <a href="{% url 'article' 's' video.series.pk %}" >{{ video.series }}</a></li>{% endif %}
-     {% if video.director %}<li>Director: <a href="{% url 'article' 'd' video.director.pk %}" >{{ video.director }}</a></li>{% endif %}
-	 <li>Actresses: {% for a in video.actresses.all %}<a href="{% url 'article' 'a' a.pk %}" >{{ a.name }}</a> {% empty %}-{% endfor %}</li>
-	 <li>Tags: {% for k in video.keywords.all %}<a href="{% url 'article' 'k' k.pk %}" >{{ k.name }}</a> {% empty %}-{% endfor %}</li>
-	</ul>
-   </div>
-  </div>
-  <div class="item" data-id="2">
-   <img src="{{ domain.0 }}{{ video.cover }}" style="width: 100% !important;" />
-  </div>
-  <div class="item" data-id="3" align="center" >
-   <video style="padding: 5% 2% 10% 2% !important; width: 100% !important;" controls >
-    <source src="{{ domain.1 }}{{ video.s_vid }}" type="video/mp4" />
-   </video>
   </div>
  </div>
- <a class="left carousel-control" href="#main-info" role="button" data-slide="prev" style="width: 30px;" >
-  <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
- </a>
- <a class="right carousel-control" href="#main-info" role="button" data-slide="next" style="width: 30px;" >
-  <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
- </a>
-</div>
-</div>
+{% endblock %}
+{% block footer_javascript %}
+<script>
+var s_vid_src = "{% url 'media' %}?v={{ video.pk }}&r=v&s=";
+function lload(d){var i=$('img',d);i.attr('src',i.data('src')); }
+function sload(s){ $('#samplevid').html($('<source type="video/mp4"/>').attr('src',s_vid_src+s)); }
+$(document).ready(function(){
+	$('#cover').on('show.bs.collapse',function(){lload(this);});
+	$('#spim').on('slid.bs.carousel',function(){lload($('.active.item',this));});
+	$('#v_sm').click(function(){sload('sm')});
+	$('#v_dm').click(function(){sload('dm')});
+	$('#v_dmb').click(function(){sload('dmb')});
+});
+</script>
 {% endblock %}

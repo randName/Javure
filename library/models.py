@@ -1,7 +1,6 @@
 from django.db import models
 
 class Article(models.Model):
-
     _id = models.PositiveIntegerField( 'ID', primary_key=True )
 
     def __str__(self):
@@ -11,30 +10,26 @@ class Article(models.Model):
         abstract = True
 
 class Maker(Article):
-
-    name = models.CharField( max_length=50 )
+    name = models.CharField( max_length=40 )
     url = models.URLField( 'URL', blank=True )
     description = models.TextField( blank=True )
     roma = models.CharField( 'ローマ字', max_length=50, blank=True )
 
 class Label(Article):
-
     name = models.TextField()
 
 class Series(Article):
-
     name = models.TextField()
 
     class Meta:
         verbose_name_plural = 'series'
 
 class Director(Article):
-
-    name = models.CharField( max_length=50 )
+    name = models.CharField( max_length=30 )
 
 class Keyword(Article):
+    name = models.CharField( max_length=30 )
 
-    name = models.CharField( max_length=20 )
     SITUATION = 0
     ATYPE = 1
     COSTUME = 2
@@ -51,11 +46,10 @@ class Keyword(Article):
         (MISC, 'Others'),
     )
 
-    category = models.PositiveIntegerField( choices=CATEGORIES, default=MISC )
+    category = models.PositiveSmallIntegerField( choices=CATEGORIES, default=MISC )
 
 class Actress(Article):
-
-    name = models.CharField( max_length=50 )
+    name = models.CharField( max_length=30 )
     roma = models.CharField( 'ローマ字', max_length=50, blank=True )
     furi = models.CharField( '振り仮名', max_length=20, blank=True )
     alias = models.CharField( '別名', max_length=50, blank=True )
@@ -64,11 +58,10 @@ class Actress(Article):
         verbose_name_plural = 'actresses'
 
 class Video(models.Model):
-
-    _id = models.SlugField( 'ID', primary_key=True, max_length=20 )
-    released_date = models.DateField( 'Released Date' )
-    runtime = models.DurationField()
     title = models.TextField()
+    name = models.SlugField( '品番', max_length=20, blank=True, null=True )
+    runtime = models.DurationField( blank=True, null=True )
+    released_date = models.DateField( 'Released Date', blank=True, null=True )
 
     maker = models.ForeignKey( Maker, on_delete=models.PROTECT )
     label = models.ForeignKey( Label, on_delete=models.SET_NULL, blank=True, null=True )
@@ -78,14 +71,14 @@ class Video(models.Model):
     actresses = models.ManyToManyField( Actress, blank=True )
 
     def __str__(self):
-        return self._id
+        return self.title
 
     class Meta:
         ordering = ['-released_date']
 
 class Content(models.Model):
 
-    cid = models.SlugField( 'Content ID', primary_key=True )
+    cid = models.SlugField( 'Content ID' )
     pid = models.SlugField( 'Product ID' )
 
     DIGITAL = 0
@@ -96,8 +89,13 @@ class Content(models.Model):
         (MONO, 'DVD'),
     )
 
-    realm = models.PositiveIntegerField( choices=REALMS, default=DIGITAL )
+    realm = models.PositiveSmallIntegerField( choices=REALMS, default=DIGITAL )
     video = models.ForeignKey( Video, on_delete=models.CASCADE )
+    width = models.PositiveSmallIntegerField( default=0 )
+    height = models.PositiveSmallIntegerField( default=0 )
 
     def __str__(self):
         return self.cid
+
+    class Meta:
+        ordering = ['realm']

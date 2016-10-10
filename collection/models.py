@@ -4,7 +4,7 @@ from library.models import *
 
 class Item(models.Model):
 
-    video = models.OneToOneField( Video, on_delete=models.CASCADE )
+    # video = models.OneToOneField( Video, on_delete=models.CASCADE )
 
     filesize = models.PositiveIntegerField( 'size (MB)', null=True, blank=True )
     height = models.PositiveIntegerField( null=True,  blank=True )
@@ -51,7 +51,7 @@ class Profile(models.Model):
     keywords = models.ManyToManyField( Keyword, blank=True )
     actresses = models.ManyToManyField( Actress, blank=True )
 
-    videos = models.ManyToManyField( Video, blank=True )
+    # videos = models.ManyToManyField( Video, blank=True )
     items = models.ManyToManyField( Item, blank=True )
 
     def __str__(self):
