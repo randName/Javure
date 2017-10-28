@@ -2,13 +2,13 @@ from django.db import models
 from django.contrib.auth.models import User
 from library.models import *
 
-class Item(models.Model):
+class FileItem(models.Model):
 
-    # video = models.OneToOneField( Video, on_delete=models.CASCADE )
+    video = models.OneToOneField(Video, on_delete=models.CASCADE)
 
-    filesize = models.PositiveIntegerField( 'size (MB)', null=True, blank=True )
-    height = models.PositiveIntegerField( null=True,  blank=True )
-    width = models.PositiveIntegerField( null=True, blank=True )
+    filesize = models.PositiveIntegerField('size (MB)', null=True, blank=True)
+    height = models.PositiveIntegerField(null=True,  blank=True)
+    width = models.PositiveIntegerField(null=True, blank=True)
 
     OTHER = 0
     MP4 = 1
@@ -28,31 +28,32 @@ class Item(models.Model):
         (ISO, 'Disc Image'),
     )
 
-    container = models.PositiveIntegerField( choices=CONTAINERS, default=OTHER )
+    container = models.PositiveIntegerField(choices=CONTAINERS, default=OTHER)
 
     has_watermarks = models.BooleanField()
     has_subtitles = models.BooleanField()
     has_adverts = models.BooleanField()
 
-    parts = models.PositiveIntegerField( default=1 )
-    remarks = models.TextField( blank=True )
+    parts = models.PositiveIntegerField(default=1)
+    remarks = models.TextField(blank=True)
 
     def __str__(self):
-        return self.video.display_id
+        return self.video.vid
+
 
 class Profile(models.Model):
 
-    user = models.OneToOneField( User, on_delete=models.CASCADE )
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
 
-    makers = models.ManyToManyField( Maker, blank=True )
-    labels = models.ManyToManyField( Label, blank=True )
-    series = models.ManyToManyField( Series, blank=True )
-    directors = models.ManyToManyField( Director, blank=True )
-    keywords = models.ManyToManyField( Keyword, blank=True )
-    actresses = models.ManyToManyField( Actress, blank=True )
+    makers = models.ManyToManyField(Maker, blank=True)
+    labels = models.ManyToManyField(Label, blank=True)
+    series = models.ManyToManyField(Series, blank=True)
+    directors = models.ManyToManyField(Director, blank=True)
+    keywords = models.ManyToManyField(Keyword, blank=True)
+    actresses = models.ManyToManyField(Actress, blank=True)
 
-    # videos = models.ManyToManyField( Video, blank=True )
-    items = models.ManyToManyField( Item, blank=True )
+    videos = models.ManyToManyField(Video, blank=True)
+    items = models.ManyToManyField(FileItem, blank=True)
 
     def __str__(self):
         return self.user.username

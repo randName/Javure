@@ -16,56 +16,54 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
-
-from django.core.exceptions import ImproperlyConfigured
- 
-def get_env_variable(var_name):
+def get_env_variable(key):
+    """Return the value of the environment variable if it exists."""
     try:
-        return os.environ[var_name]
+        return os.environ[key]
     except KeyError:
-        error_msg = "Set the %s environment variable" % var_name
-        raise ImproperlyConfigured(error_msg)
-  
+        from django.core.exceptions import ImproperlyConfigured
+        raise ImproperlyConfigured('Environment Variable not set: %s' % key)
+
+# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = get_env_variable('DJANGO_SECRET_KEY')
 
-ALLOWED_HOSTS = []
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = bool(os.getenv('DJANGO_DEBUG', False))
 
-import sys
-sys.path.insert( 1, get_env_variable('DMM_PATH') )
+ALLOWED_HOSTS = get_env_variable('DJANGO_ALLOWED_HOSTS').split(',')
+
 
 # Application definition
 
-INSTALLED_APPS = (
-'django.contrib.admin',
-'django.contrib.auth',
-'django.contrib.contenttypes',
-'django.contrib.sessions',
-'django.contrib.messages',
-'django.contrib.staticfiles',
-'django.contrib.postgres',
-'library',
-'collection',
-)
+INSTALLED_APPS = [
+    'django.contrib.admin',
+    'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
+    'django.contrib.postgres',
+    'library.apps.LibraryConfig',
+    'scraper.apps.ScraperConfig',
+    'collection.apps.CollectionConfig',
+]
 
-MIDDLEWARE_CLASSES = (
-'django.contrib.sessions.middleware.SessionMiddleware',
-'django.middleware.common.CommonMiddleware',
-'django.middleware.csrf.CsrfViewMiddleware',
-'django.contrib.auth.middleware.AuthenticationMiddleware',
-'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
-'django.contrib.messages.middleware.MessageMiddleware',
-'django.middleware.clickjacking.XFrameOptionsMiddleware',
-'django.middleware.security.SecurityMiddleware',
-)
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
 
 ROOT_URLCONF = 'javure.urls'
 
 TEMPLATES = [
 {
     'BACKEND': 'django.template.backends.django.DjangoTemplates',
-    'DIRS': [ os.path.join(BASE_DIR, "templates") ],
+    'DIRS': [], #[ os.path.join(BASE_DIR, "templates") ],
     'APP_DIRS': True,
     'OPTIONS': {
         'context_processors': [
@@ -92,9 +90,29 @@ DATABASES = {
 }
 
 import dj_database_url
+
 db_from_env = dj_database_url.config(conn_max_age=500)
 DATABASES['default'].update(db_from_env)
-DATABASES['default']['HOST'] = ''
+
+
+# Password validation
+# https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
